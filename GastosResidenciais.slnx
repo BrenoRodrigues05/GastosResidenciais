@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="../../tests/GastosResidenciais.Application.Tests/GastosResidenciais.Application.Tests.csproj" Id="887a9bc5-8ecf-4900-9e8f-3eaf774fc089" />
+  <Project Path="../../tests/GastosResidenciais.Domain.Tests/GastosResidenciais.Domain.Tests.csproj" Id="6c22de14-30db-41ee-b4c7-de20d81ee9ed" />
+  <Project Path="../GastosResidenciais.Api/GastosResidenciais.Api.csproj" Id="27b3d6ec-39b7-408d-b2d7-486c93de8e3c" />
+  <Project Path="../GastosResidenciais.Application/GastosResidenciais.Application.csproj" Id="1917d93b-2ae4-443d-b596-b6290cf66946" />
+  <Project Path="../GastosResidenciais.Domain/GastosResidenciais.Domain.csproj" Id="532389f5-92a5-48fa-88c9-b4807d183fdd" />
+  <Project Path="../GastosResidenciais.Infrastructure/GastosResidenciais.Infrastructure.csproj" Id="525a9595-b500-428a-92a4-8d3b33ed0976" />
+</Solution>
