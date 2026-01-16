@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="../../tests/GastosResidenciais.Application.Tests/GastosResidenciais.Application.Tests.csproj" />
+  <Project Path="../../tests/GastosResidenciais.Domain.Tests/GastosResidenciais.Domain.Tests.csproj" />
+  <Project Path="../GastosResidenciais.Application/GastosResidenciais.Application.csproj" />
+  <Project Path="../GastosResidenciais.Domain/GastosResidenciais.Domain.csproj" />
+  <Project Path="../GastosResidenciais.Infrastructure/GastosResidenciais.Infrastructure.csproj" />
+  <Project Path="GastosResidenciais.Api.csproj" />
+</Solution>
