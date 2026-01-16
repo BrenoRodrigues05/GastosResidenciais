@@ -1,16 +1,16 @@
 ﻿using GastosResidenciais.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GastosResidenciais.Application.DTOs
 {
+    /// <summary>DTO para criação de categoria.</summary>
     public class CategoriaCreateDto
     {
+        /// <summary>Descrição da categoria (ex.: Alimentação, Salário).</summary>
+        /// <example>Alimentação</example>
         public string Descricao { get; set; } = string.Empty;
+
+        /// <summary>Finalidade da categoria (Receita, Despesa ou Ambas).</summary>
+        /// <example>Despesa</example>
         public FinalidadeCategoria Finalidade { get; set; }
     }
 }

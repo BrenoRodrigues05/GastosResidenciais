@@ -1,15 +1,15 @@
 ﻿using GastosResidenciais.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GastosResidenciais.Application.DTOs
 {
     public class CategoriaUpdateDto
     {
+        /// <summary>Nova descrição da categoria.</summary>
+        /// <example>Transporte</example>
         public string Descricao { get; set; } = string.Empty;
+
+        /// <summary>Nova finalidade da categoria.</summary>
+        /// <example>Despesa</example>
         public FinalidadeCategoria Finalidade { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using GastosResidenciais.Application.Services;
+﻿using GastosResidenciais.Application.DTOs;
+using GastosResidenciais.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GastosResidenciais.Api.Controllers
@@ -17,10 +18,6 @@ namespace GastosResidenciais.Api.Controllers
     {
         private readonly RelatorioService _service;
 
-        /// <summary>
-        /// Inicializa uma nova instância do <see cref="RelatoriosController"/>.
-        /// </summary>
-        /// <param name="service">Serviço responsável pelo cálculo dos relatórios financeiros.</param>
         public RelatoriosController(RelatorioService service)
         {
             _service = service;
@@ -51,7 +48,7 @@ namespace GastosResidenciais.Api.Controllers
         /// </returns>
         /// <response code="200">Relatório gerado com sucesso.</response>
         [HttpGet("totais-por-pessoa")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(RelatorioTotaisPorPessoaResponseDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> TotaisPorPessoa()
         {
             var (pessoas, totalGeral) = await _service.GetTotaisPorPessoaAsync();

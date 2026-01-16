@@ -5,16 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace GastosResidenciais.Api.Controllers
 {
     /// <summary>
-    /// Controller responsável pelo gerenciamento de transações financeiras
-    /// (receitas e despesas) do sistema.
+    /// Gerencia transações financeiras (receitas e despesas).
     /// </summary>
     /// <remarks>
-    /// Este controller expõe endpoints para:
-    /// - Criação de transações
-    /// - Listagem de transações com dados relacionados de pessoa e categoria
-    ///
-    /// As regras de negócio são aplicadas na camada de serviço
-    /// (<see cref="TransacaoService"/>).
+    /// Regras principais:
+    /// - Menores de 18 anos não podem cadastrar <c>Receita</c>.
+    /// - A categoria deve ser compatível com o tipo da transação.
     /// </remarks>
     [Route("api/[controller]")]
     [ApiController]
@@ -22,67 +18,34 @@ namespace GastosResidenciais.Api.Controllers
     {
         private readonly TransacaoService _service;
 
-        /// <summary>
-        /// Inicializa uma nova instância do <see cref="TransacoesController"/>.
-        /// </summary>
-        /// <param name="service">Serviço responsável pelas regras de negócio de transações.</param>
-        public TransacoesController(TransacaoService service)
-        {
-            _service = service;
-        }
+        public TransacoesController(TransacaoService service) => _service = service;
 
-        /// <summary>
-        /// Cria uma nova transação financeira.
-        /// </summary>
-        /// <remarks>
-        /// Regras de negócio aplicadas:
-        /// <list type="bullet">
-        /// <item>
-        /// <description>Pessoas menores de 18 anos não podem cadastrar transações do tipo <c>Receita</c>.</description>
-        /// </item>
-        /// <item>
-        /// <description>
-        /// A categoria informada deve ser compatível com o tipo da transação
-        /// (finalidade despesa, receita ou ambas).
-        /// </description>
-        /// </item>
-        /// </list>
-        /// </remarks>
-        /// <param name="dto">Objeto contendo os dados necessários para criação da transação.</param>
-        /// <returns>Identificador da transação criada.</returns>
-        /// <response code="201">Transação criada com sucesso.</response>
-        /// <response code="400">Violação de regra de negócio ou dados inválidos.</response>
+        /// <summary>Cria uma nova transação.</summary>
+        /// <param name="dto">Dados da transação.</param>
+        /// <returns>ID da transação criada.</returns>
+        /// <response code="201">Criada com sucesso.</response>
+        /// <response code="400">Dados inválidos ou regra de negócio violada.</response>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiErrorDto), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] TransacaoCreateDto dto)
         {
             try
             {
                 var id = await _service.CreateAsync(dto);
-                return CreatedAtAction(nameof(GetAll), new { }, new { id });
+                return StatusCode(StatusCodes.Status201Created, new { id });
             }
             catch (InvalidOperationException ex)
             {
-                // Regras de negócio → 400 com mensagem clara
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new ApiErrorDto { Error = ex.Message });
             }
         }
 
-        /// <summary>
-        /// Lista todas as transações cadastradas no sistema.
-        /// </summary>
-        /// <remarks>
-        /// Cada transação retornada inclui:
-        /// <list type="bullet">
-        /// <item><description>Dados da pessoa associada</description></item>
-        /// <item><description>Dados da categoria associada</description></item>
-        /// </list>
-        /// </remarks>
-        /// <returns>Lista de transações cadastradas.</returns>
+        /// <summary>Lista todas as transações.</summary>
+        /// <remarks>Retorna transações com dados básicos de pessoa e categoria.</remarks>
         /// <response code="200">Lista retornada com sucesso.</response>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<TransacaoListDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
         {
             var list = await _service.ListAsync();

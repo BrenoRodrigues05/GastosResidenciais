@@ -3,6 +3,7 @@ using GastosResidenciais.Application.Services;
 using GastosResidenciais.Infrastructure.Data;
 using GastosResidenciais.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,20 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    // XML do projeto da API
+    var apiXml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var apiXmlPath = Path.Combine(AppContext.BaseDirectory, apiXml);
+    if (File.Exists(apiXmlPath)) c.IncludeXmlComments(apiXmlPath);
+
+    // XML do projeto Application (onde estão os DTOs)
+    var appAssembly = typeof(GastosResidenciais.Application.DTOs.TransacaoCreateDto).Assembly;
+    var appXml = $"{appAssembly.GetName().Name}.xml";
+    var appXmlPath = Path.Combine(AppContext.BaseDirectory, appXml);
+    if (File.Exists(appXmlPath)) c.IncludeXmlComments(appXmlPath);
+});
 
 // Add DbContext with MySQL
 var mysqlconnection = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -42,7 +56,8 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseCors("Frontend");
