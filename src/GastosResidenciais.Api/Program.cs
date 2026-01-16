@@ -4,6 +4,7 @@ using GastosResidenciais.Infrastructure.Data;
 using GastosResidenciais.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,7 @@ builder.Services.AddCors(options =>
 });
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -34,6 +35,8 @@ builder.Services.AddSwaggerGen(c =>
     var appXml = $"{appAssembly.GetName().Name}.xml";
     var appXmlPath = Path.Combine(AppContext.BaseDirectory, appXml);
     if (File.Exists(appXmlPath)) c.IncludeXmlComments(appXmlPath);
+
+    c.SchemaFilter<GastosResidenciais.Api.Swagger.EnumSchemaFilter>();
 });
 
 // Add DbContext with MySQL
