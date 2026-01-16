@@ -95,5 +95,17 @@ namespace GastosResidenciais.Infrastructure.Repositories
         {
             _context.Pessoas.Remove(pessoa);
         }
+
+        /// <summary>
+        /// Atualiza uma pessoa do contexto de persistência.
+        /// </summary>
+        /// <remarks>
+        /// A atualização das transações vinculadas deve ocorrer conforme configuração do mapeamento
+        /// </remarks>
+        /// <param name="pessoa">Pessoa a ser atualizada.</param>
+        public void Update(Pessoa pessoa)
+        {
+            _context.Pessoas.Update(pessoa);
+        }
     }
 }

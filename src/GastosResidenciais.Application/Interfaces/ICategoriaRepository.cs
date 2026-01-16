@@ -39,5 +39,24 @@ namespace GastosResidenciais.Application.Interfaces
         /// </remarks>
         /// <param name="categoria">Categoria a ser adicionada.</param>
         Task AddAsync(Categoria categoria);
+
+        /// <summary>
+        /// Atualiza uma categoria no contexto de persistência.
+        /// </summary>
+        /// <remarks>
+        /// A persistência efetiva ocorre somente após <see cref="IUnitOfWork.SaveChangesAsync"/>.
+        /// </remarks>
+        /// <param name="categoria">Categoria a ser atualizada.</param>
+        void Update(Categoria categoria);
+
+        /// <summary>
+        /// Remove uma categoria do contexto de persistência.
+        /// </summary>
+        /// <remarks>
+        /// A persistência efetiva ocorre somente após <see cref="IUnitOfWork.SaveChangesAsync"/>.
+        /// </remarks>
+        /// <param name="categoria">Categoria a ser removida.</param>
+        void Remove(Categoria categoria);
+
     }
 }

@@ -16,27 +16,12 @@ namespace GastosResidenciais.Infrastructure.Repositories
     {
         private readonly List<Pessoa> _pessoas = new();
 
-        /// <summary>
-        /// Inicializa o repositório fake com uma lista inicial de pessoas.
-        /// </summary>
-        /// <param name="pessoas">Pessoas que serão adicionadas inicialmente ao repositório.</param>
         public FakePessoaRepository(params Pessoa[] pessoas)
         {
             foreach (var p in pessoas)
-            {
                 AddWithId(p);
-            }
         }
 
-        /// <summary>
-        /// Adiciona uma pessoa atribuindo um identificador incremental.
-        /// </summary>
-        /// <remarks>
-        /// Como a entidade <see cref="Pessoa"/> possui o identificador com setter privado,
-        /// este método utiliza reflexão para simular o comportamento do Entity Framework
-        /// durante os testes.
-        /// </remarks>
-        /// <param name="pessoa">Pessoa a ser adicionada.</param>
         private void AddWithId(Pessoa pessoa)
         {
             var prop = typeof(Pessoa).GetProperty(
@@ -48,45 +33,36 @@ namespace GastosResidenciais.Infrastructure.Repositories
             _pessoas.Add(pessoa);
         }
 
-        /// <summary>
-        /// Adiciona uma nova pessoa ao repositório em memória.
-        /// </summary>
-        /// <param name="pessoa">Pessoa a ser adicionada.</param>
-        /// <returns>Tarefa concluída.</returns>
         public Task AddAsync(Pessoa pessoa)
         {
             AddWithId(pessoa);
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Recupera uma pessoa pelo identificador.
-        /// </summary>
-        /// <param name="id">Identificador da pessoa.</param>
-        /// <returns>
-        /// A pessoa encontrada, ou <c>null</c> caso não exista registro com o identificador informado.
-        /// </returns>
         public Task<Pessoa?> GetByIdAsync(int id)
-        {
-            return Task.FromResult(_pessoas.FirstOrDefault(x => x.Id == id));
-        }
+            => Task.FromResult(_pessoas.FirstOrDefault(x => x.Id == id));
 
-        /// <summary>
-        /// Retorna todas as pessoas armazenadas no repositório em memória.
-        /// </summary>
-        /// <returns>Lista de pessoas.</returns>
         public Task<List<Pessoa>> ListAsync()
-        {
-            return Task.FromResult(_pessoas.ToList());
-        }
+            => Task.FromResult(_pessoas.ToList());
 
-        /// <summary>
-        /// Remove uma pessoa do repositório em memória.
-        /// </summary>
-        /// <param name="pessoa">Pessoa a ser removida.</param>
         public void Remove(Pessoa pessoa)
         {
-            _pessoas.Remove(pessoa);
+            // Remover por Id é mais seguro do que por referência
+            _pessoas.RemoveAll(x => x.Id == pessoa.Id);
+        }
+
+        /// <summary>
+        /// Atualiza uma pessoa existente no repositório em memória.
+        /// </summary>
+        /// <remarks>
+        /// Normalmente o objeto já está atualizado (ex.: via pessoa.Atualizar()),
+        /// mas mantemos este método para ficar 100% igual ao contrato do repositório real.
+        /// </remarks>
+        public void Update(Pessoa pessoa)
+        {
+            var index = _pessoas.FindIndex(x => x.Id == pessoa.Id);
+            if (index >= 0)
+                _pessoas[index] = pessoa;
         }
     }
 }

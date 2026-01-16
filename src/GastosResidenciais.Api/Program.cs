@@ -53,6 +53,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // Application Services
 builder.Services.AddScoped<TransacaoService>();
 builder.Services.AddScoped<RelatorioService>();
+builder.Services.AddScoped<PessoaService>();
+builder.Services.AddScoped<CategoriaService>();
 
 var app = builder.Build();
 

@@ -51,5 +51,23 @@ namespace GastosResidenciais.Domain.Entities
             Descricao = descricao.Trim();
             Finalidade = finalidade;
         }
+
+        /// <summary>
+        /// Atualiza os dados da categoria.
+        /// </summary>
+        /// <param name="descricao">Nova descrição.</param>
+        /// <param name="finalidade">Nova finalidade.</param>
+        /// <exception cref="ArgumentException">
+        /// Lançada quando a descrição é inválida.
+        /// </exception>
+        public void Atualizar(string descricao, FinalidadeCategoria finalidade)
+        {
+            if (string.IsNullOrWhiteSpace(descricao))
+                throw new ArgumentException("Descrição é obrigatória.");
+
+            Descricao = descricao.Trim();
+            Finalidade = finalidade;
+        }
+
     }
 }

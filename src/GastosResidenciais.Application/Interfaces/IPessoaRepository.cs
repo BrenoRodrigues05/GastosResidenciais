@@ -53,5 +53,14 @@ namespace GastosResidenciais.Application.Interfaces
         /// </remarks>
         /// <param name="pessoa">Pessoa a ser removida.</param>
         void Remove(Pessoa pessoa);
+
+        /// <summary>
+        /// Atualiza uma pessoa no contexto de persistência.
+        /// </summary>
+        /// <remarks>
+        /// A persistência efetiva ocorre somente após <see cref="IUnitOfWork.SaveChangesAsync"/>.
+        /// </remarks>
+        /// <param name="pessoa">Pessoa a ser atualizada.</param>
+        void Update(Pessoa pessoa);
     }
 }

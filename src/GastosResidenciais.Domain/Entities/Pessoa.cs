@@ -61,5 +61,25 @@
             Nome = nome.Trim();
             Idade = idade;
         }
+
+        /// <summary>
+        /// Atualiza os dados da pessoa.
+        /// </summary>
+        /// <param name="nome">Novo nome.</param>
+        /// <param name="idade">Nova idade.</param>
+        /// <exception cref="ArgumentException">
+        /// Lançada quando nome/idade forem inválidos.
+        /// </exception>
+        public void Atualizar(string nome, int idade)
+        {
+            if (string.IsNullOrWhiteSpace(nome))
+                throw new ArgumentException("Nome é obrigatório.");
+
+            if (idade <= 0)
+                throw new ArgumentException("Idade deve ser um inteiro positivo.");
+
+            Nome = nome.Trim();
+            Idade = idade;
+        }
     }
 }

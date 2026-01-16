@@ -15,27 +15,12 @@ namespace GastosResidenciais.Infrastructure.Repositories
     {
         private readonly List<Categoria> _categorias = new();
 
-        /// <summary>
-        /// Inicializa o repositório fake com uma lista inicial de categorias.
-        /// </summary>
-        /// <param name="categorias">Categorias que serão adicionadas inicialmente ao repositório.</param>
         public FakeCategoriaRepository(params Categoria[] categorias)
         {
             foreach (var c in categorias)
-            {
                 AddWithId(c);
-            }
         }
 
-        /// <summary>
-        /// Adiciona uma categoria atribuindo um identificador incremental.
-        /// </summary>
-        /// <remarks>
-        /// Como a entidade <see cref="Categoria"/> possui o identificador com setter privado,
-        /// este método utiliza reflexão para simular o comportamento do Entity Framework
-        /// durante os testes.
-        /// </remarks>
-        /// <param name="categoria">Categoria a ser adicionada.</param>
         private void AddWithId(Categoria categoria)
         {
             var prop = typeof(Categoria).GetProperty(
@@ -47,36 +32,39 @@ namespace GastosResidenciais.Infrastructure.Repositories
             _categorias.Add(categoria);
         }
 
-        /// <summary>
-        /// Adiciona uma nova categoria ao repositório em memória.
-        /// </summary>
-        /// <param name="categoria">Categoria a ser adicionada.</param>
-        /// <returns>Tarefa concluída.</returns>
         public Task AddAsync(Categoria categoria)
         {
             AddWithId(categoria);
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Recupera uma categoria pelo identificador.
-        /// </summary>
-        /// <param name="id">Identificador da categoria.</param>
-        /// <returns>
-        /// A categoria encontrada, ou <c>null</c> caso não exista registro com o identificador informado.
-        /// </returns>
         public Task<Categoria?> GetByIdAsync(int id)
+            => Task.FromResult(_categorias.FirstOrDefault(x => x.Id == id));
+
+        public Task<List<Categoria>> ListAsync()
+            => Task.FromResult(_categorias.ToList());
+
+        /// <summary>
+        /// Atualiza uma categoria existente no repositório em memória.
+        /// </summary>
+        /// <remarks>
+        /// Como a entidade é mutável apenas via métodos de domínio (ex.: Atualizar),
+        /// aqui a atualização geralmente já foi aplicada no objeto.
+        /// Este método garante que a referência armazenada seja a correta.
+        /// </remarks>
+        public void Update(Categoria categoria)
         {
-            return Task.FromResult(_categorias.FirstOrDefault(x => x.Id == id));
+            var index = _categorias.FindIndex(x => x.Id == categoria.Id);
+            if (index >= 0)
+                _categorias[index] = categoria;
         }
 
         /// <summary>
-        /// Retorna todas as categorias armazenadas no repositório em memória.
+        /// Remove uma categoria do repositório em memória.
         /// </summary>
-        /// <returns>Lista de categorias.</returns>
-        public Task<List<Categoria>> ListAsync()
+        public void Remove(Categoria categoria)
         {
-            return Task.FromResult(_categorias.ToList());
+            _categorias.RemoveAll(x => x.Id == categoria.Id);
         }
     }
 }

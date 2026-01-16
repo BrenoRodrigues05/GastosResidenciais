@@ -62,5 +62,33 @@ namespace GastosResidenciais.Infrastructure.Repositories
         {
             await _context.Categorias.AddAsync(categoria);
         }
+
+        /// <summary>
+        /// Atualiza uma categoria existente.
+        /// </summary>
+        /// <remarks>
+        /// Este método apenas atualiza a entidade referente no <see cref="DbContext"/>.
+        /// Para persistir de fato no banco de dados, é necessário chamar
+        /// <see cref="IUnitOfWork.SaveChangesAsync"/>.
+        /// </remarks>
+        /// <param name="categoria">Categoria a ser adicionada.</param>
+        public void Update(Categoria categoria)
+        {
+             _context.Categorias.Update(categoria);
+        }
+
+        /// <summary>
+        /// Remove uma categoria existente.
+        /// </summary>
+        /// <remarks>
+        /// Este método remove  uma a entidade existente no <see cref="DbContext"/>.
+        /// Para persistir de fato no banco de dados, é necessário chamar
+        /// <see cref="IUnitOfWork.SaveChangesAsync"/>.
+        /// </remarks>
+        /// <param name="categoria">Categoria a ser adicionada.</param>
+        public void Remove(Categoria categoria)
+        {
+            _context.Categorias.Remove(categoria);
+        }
     }
 }
