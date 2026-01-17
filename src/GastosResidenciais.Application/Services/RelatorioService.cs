@@ -7,13 +7,13 @@ namespace GastosResidenciais.Application.Services
     /// DTO de saída para consolidado financeiro por pessoa.
     /// </summary>
     /// <param name="PessoaId">Identificador da pessoa.</param>
-    /// <param name="Nome">Nome da pessoa.</param>
+    /// <param name="PessoaNome">Nome da pessoa.</param>
     /// <param name="TotalReceitas">Somatório de receitas da pessoa.</param>
     /// <param name="TotalDespesas">Somatório de despesas da pessoa.</param>
     /// <param name="Saldo">Saldo da pessoa (TotalReceitas - TotalDespesas).</param>
     public record TotaisPessoaDto(
         int PessoaId,
-        string Nome,
+        string PessoaNome,
         decimal TotalReceitas,
         decimal TotalDespesas,
         decimal Saldo

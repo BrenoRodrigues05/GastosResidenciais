@@ -52,7 +52,26 @@ namespace GastosResidenciais.Api.Controllers
         public async Task<IActionResult> TotaisPorPessoa()
         {
             var (pessoas, totalGeral) = await _service.GetTotaisPorPessoaAsync();
-            return Ok(new { pessoas, totalGeral });
+
+            var response = new RelatorioTotaisPorPessoaResponseDto
+            {
+                Pessoas = pessoas.Select(p => new RelatorioPessoaTotaisDto
+                {
+                    PessoaId = p.PessoaId,
+                    PessoaNome = p.PessoaNome,
+                    TotalReceitas = p.TotalReceitas,
+                    TotalDespesas = p.TotalDespesas,
+                    Saldo = p.Saldo
+                }).ToList(),
+                TotalGeral = new RelatorioTotalGeralDto
+                {
+                    TotalReceitas = totalGeral.TotalReceitas,
+                    TotalDespesas = totalGeral.TotalDespesas,
+                    Saldo = totalGeral.Saldo
+                }
+            };
+
+            return Ok(response);
         }
     }
 }

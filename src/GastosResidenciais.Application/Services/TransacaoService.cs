@@ -134,7 +134,9 @@ namespace GastosResidenciais.Application.Services
                 Tipo = t.Tipo,
                 CategoriaId = t.CategoriaId,
                 CategoriaDescricao = t.Categoria.Descricao,
+                CategoriaFinalidade = t.Categoria.Finalidade,
                 PessoaId = t.PessoaId,
+                Data = t.Data,
                 PessoaNome = t.Pessoa.Nome
             }).ToList();
         }
