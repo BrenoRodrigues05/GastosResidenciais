@@ -31,7 +31,7 @@ namespace GastosResidenciais.Api.Controllers
             try
             {
                 await _service.CreateAsync(dto);
-                return Ok(new { message = "Categoria criada com sucesso!" });
+                return StatusCode(201, new { message = "Categoria adicionada com sucesso!" });
             }
             catch (InvalidOperationException ex)
             {
