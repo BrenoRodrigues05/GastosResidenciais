@@ -57,6 +57,11 @@ namespace GastosResidenciais.Domain.Entities
         public Pessoa Pessoa { get; private set; } = default!;
 
         /// <summary>
+        /// Data e hora da transação
+        /// </summary>
+        public DateTime? Data { get; private set; }
+
+        /// <summary>
         /// Construtor protegido utilizado exclusivamente pelo Entity Framework.
         /// </summary>
         private Transacao() { }
@@ -69,6 +74,7 @@ namespace GastosResidenciais.Domain.Entities
         /// <param name="tipo">Tipo da transação (receita ou despesa).</param>
         /// <param name="categoriaId">Identificador da categoria associada.</param>
         /// <param name="pessoaId">Identificador da pessoa associada.</param>
+        /// <param name="Data">Identificador da data associada à transação.</param>
         /// <exception cref="ArgumentException">
         /// Lançada quando:
         /// <list type="bullet">
@@ -78,7 +84,7 @@ namespace GastosResidenciais.Domain.Entities
         /// <item><description>O identificador da pessoa é inválido.</description></item>
         /// </list>
         /// </exception>
-        public Transacao(string descricao, decimal valor, TipoTransacao tipo, int categoriaId, int pessoaId)
+        public Transacao(string descricao, decimal valor, TipoTransacao tipo, int categoriaId, int pessoaId, DateTime? Data)
         {
             if (string.IsNullOrWhiteSpace(descricao))
                 throw new ArgumentException("Descrição é obrigatória.");
@@ -97,6 +103,7 @@ namespace GastosResidenciais.Domain.Entities
             Tipo = tipo;
             CategoriaId = categoriaId;
             PessoaId = pessoaId;
+            this.Data = Data;
         }
     }
 }

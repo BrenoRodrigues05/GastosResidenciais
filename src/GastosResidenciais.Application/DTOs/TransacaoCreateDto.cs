@@ -34,6 +34,6 @@ namespace GastosResidenciais.Application.DTOs
 
         /// <summary>Data/hora da transação (UTC).</summary>
         /// <example>2026-01-16T12:30:00Z</example>
-        public DateTime Data { get; set; } = DateTime.UtcNow;
+        public DateTime? Data { get; set; }
     }
 }

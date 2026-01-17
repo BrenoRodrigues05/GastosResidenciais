@@ -90,7 +90,7 @@ namespace GastosResidenciais.Application.Services
             if (!CategoriaCompativel(dto.Tipo, categoria.Finalidade))
                 throw new InvalidOperationException("Categoria incompatível com o tipo da transação.");
 
-            var transacao = new Transacao(dto.Descricao, dto.Valor, dto.Tipo, dto.CategoriaId, dto.PessoaId);
+            var transacao = new Transacao(dto.Descricao, dto.Valor, dto.Tipo, dto.CategoriaId, dto.PessoaId, dto.Data);
 
             await _transacoes.AddAsync(transacao);
             await _uow.SaveChangesAsync();

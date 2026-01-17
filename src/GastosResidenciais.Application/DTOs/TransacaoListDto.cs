@@ -36,5 +36,13 @@ namespace GastosResidenciais.Application.DTOs
         /// <summary>Nome da pessoa.</summary>
         /// <example>Breno</example>
         public string PessoaNome { get; set; } = default!;
+
+        /// <summary>Finalidade da categoria vinculada.</summary>
+        /// <example>Despesa</example>
+        public FinalidadeCategoria CategoriaFinalidade { get; set; }
+        /// <summary>
+        /// Adicona data à transações
+        /// </summary>
+        public DateTime? Data { get; set; }
     }
 }
