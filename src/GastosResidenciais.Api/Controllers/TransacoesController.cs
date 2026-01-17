@@ -33,7 +33,10 @@ namespace GastosResidenciais.Api.Controllers
             try
             {
                 var id = await _service.CreateAsync(dto);
-                return StatusCode(StatusCodes.Status201Created, new { id });
+                return Ok(new
+                {
+                    message = "Transação criada com sucesso!"
+                });
             }
             catch (InvalidOperationException ex)
             {

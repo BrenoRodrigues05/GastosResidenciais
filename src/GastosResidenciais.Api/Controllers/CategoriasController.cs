@@ -29,7 +29,11 @@ namespace GastosResidenciais.Api.Controllers
         public async Task<IActionResult> Create([FromBody] CategoriaCreateDto dto)
         {
             var id = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id }, new { id });
+
+            return Ok(new
+            {
+                message = "Categoria criada com sucesso!"
+            });
         }
 
         /// <summary>Lista todas as categorias cadastradas.</summary>
