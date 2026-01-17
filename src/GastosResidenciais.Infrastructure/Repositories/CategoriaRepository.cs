@@ -90,5 +90,20 @@ namespace GastosResidenciais.Infrastructure.Repositories
         {
             _context.Categorias.Remove(categoria);
         }
+
+        /// <summary>
+        /// Verifica se existe uma categoria igual.
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        /// <param name="descricao">Descrição a ser verificada a existência.</param>
+        public async Task<bool> ExistsByDescricaoAsync(string descricao)
+        {
+            var normalizada = (descricao ?? string.Empty).Trim();
+
+            return await _context.Categorias
+                .AsNoTracking()
+                .AnyAsync(c => c.Descricao.ToUpper() == normalizada.ToUpper());
+        }
     }
 }

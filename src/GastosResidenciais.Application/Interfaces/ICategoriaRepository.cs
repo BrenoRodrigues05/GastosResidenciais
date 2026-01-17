@@ -58,5 +58,13 @@ namespace GastosResidenciais.Application.Interfaces
         /// <param name="categoria">Categoria a ser removida.</param>
         void Remove(Categoria categoria);
 
+        /// <summary>
+        /// Verifica se existe uma categoria igual.
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        /// <param name="descricao">Descrição a ser verificada a existência.</param>
+        Task<bool> ExistsByDescricaoAsync(string descricao);
+
     }
 }

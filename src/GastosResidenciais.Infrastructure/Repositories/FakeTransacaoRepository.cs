@@ -41,6 +41,20 @@ namespace GastosResidenciais.Infrastructure.Repositories
         }
 
         /// <summary>
+        /// Verifica se existe alguma transação vinculada a uma categoria específica.
+        /// </summary>
+        /// <param name="categoriaId">Identificador da categoria.</param>
+        /// <returns>
+        /// <c>true</c> se houver ao menos uma transação associada à categoria;
+        /// caso contrário, <c>false</c>.
+        /// </returns>
+        public Task<bool> ExistsByCategoriaIdAsync(int categoriaId)
+        {
+            var existe = _transacoes.Any(t => t.CategoriaId == categoriaId);
+            return Task.FromResult(existe);
+        }
+
+        /// <summary>
         /// Exposição somente leitura das transações armazenadas,
         /// útil para validações em testes unitários.
         /// </summary>

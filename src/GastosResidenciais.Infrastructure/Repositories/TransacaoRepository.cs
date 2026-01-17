@@ -65,5 +65,19 @@ namespace GastosResidenciais.Infrastructure.Repositories
         {
             await _context.Transacoes.AddAsync(transacao);
         }
+
+        /// <summary>
+        /// Verifica se existe alguma transação vinculada a uma categoria.
+        /// </summary>
+        /// <param name="categoriaId">Id da categoria.</param>
+        /// <returns>
+        /// <c>true</c> se existir ao menos uma transação vinculada; caso contrário, <c>false</c>.
+        /// </returns>
+        public async Task<bool> ExistsByCategoriaIdAsync(int categoriaId)
+        {
+            return await _context.Transacoes
+                .AsNoTracking()
+                .AnyAsync(t => t.CategoriaId == categoriaId);
+        }
     }
 }

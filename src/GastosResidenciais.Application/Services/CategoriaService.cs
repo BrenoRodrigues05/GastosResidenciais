@@ -1,6 +1,7 @@
 ﻿using GastosResidenciais.Application.DTOs;
 using GastosResidenciais.Application.Interfaces;
 using GastosResidenciais.Domain.Entities;
+using GastosResidenciais.Domain.Enums;
 
 namespace GastosResidenciais.Application.Services
 {
@@ -11,11 +12,13 @@ namespace GastosResidenciais.Application.Services
     {
         private readonly ICategoriaRepository _categorias;
         private readonly IUnitOfWork _uow;
+        private readonly ITransacaoRepository _transacoes;
 
-        public CategoriaService(ICategoriaRepository categorias, IUnitOfWork uow)
+        public CategoriaService(ICategoriaRepository categorias, IUnitOfWork uow, ITransacaoRepository transacoes)
         {
             _categorias = categorias;
             _uow = uow;
+            _transacoes = transacoes;
         }
 
         /// <summary>
@@ -23,7 +26,20 @@ namespace GastosResidenciais.Application.Services
         /// </summary>
         public async Task<int> CreateAsync(CategoriaCreateDto dto)
         {
-            var categoria = new Categoria(dto.Descricao, dto.Finalidade);
+            // Validação do Enum
+            if (!Enum.IsDefined(typeof(FinalidadeCategoria), dto.Finalidade))
+                throw new InvalidOperationException("Finalidade inválida. Valores permitidos: 1-Despesa, 2-Receita, 3-Ambas.");
+
+            if (dto is null)
+                throw new ArgumentNullException(nameof(dto));
+
+            var descricao = (dto.Descricao ?? string.Empty).Trim();
+
+            var existe = await _categorias.ExistsByDescricaoAsync(descricao);
+            if (existe)
+                throw new InvalidOperationException("Já existe uma categoria com essa descrição.");
+
+            var categoria = new Categoria(descricao, dto.Finalidade);
 
             await _categorias.AddAsync(categoria);
             await _uow.SaveChangesAsync();
@@ -91,6 +107,12 @@ namespace GastosResidenciais.Application.Services
             var categoria = await _categorias.GetByIdAsync(id);
             if (categoria is null)
                 return false;
+
+            var emUso = await _transacoes.ExistsByCategoriaIdAsync(id);
+            if (emUso)
+                throw new InvalidOperationException(
+                    "Não é possível excluir esta categoria porque existem transações vinculadas a ela."
+                );
 
             _categorias.Remove(categoria);
             await _uow.SaveChangesAsync();

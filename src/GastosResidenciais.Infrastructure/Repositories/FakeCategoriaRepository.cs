@@ -66,5 +66,28 @@ namespace GastosResidenciais.Infrastructure.Repositories
         {
             _categorias.RemoveAll(x => x.Id == categoria.Id);
         }
+
+        /// <summary>
+        /// Verifica se já existe uma categoria cadastrada com a mesma descrição.
+        /// </summary>
+        /// <param name="descricao">Descrição a ser verificada.</param>
+        /// <returns>
+        /// <c>true</c> se já existir categoria com a mesma descrição;
+        /// caso contrário, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// A comparação é realizada de forma case-insensitive e desconsidera
+        /// espaços em branco no início e no fim da descrição.
+        /// </remarks>
+        public Task<bool> ExistsByDescricaoAsync(string descricao)
+        {
+            var normalizada = (descricao ?? string.Empty).Trim().ToUpper();
+
+            var existe = _categorias.Any(c =>
+                c.Descricao.Trim().ToUpper() == normalizada
+            );
+
+            return Task.FromResult(existe);
+        }
     }
 }

@@ -35,5 +35,14 @@ namespace GastosResidenciais.Application.Interfaces
         /// </remarks>
         /// <param name="transacao">Transação a ser adicionada.</param>
         Task AddAsync(Transacao transacao);
+
+        /// <summary>
+        /// Verifica se existe alguma transação vinculada a uma categoria.
+        /// </summary>
+        /// <param name="categoriaId">Id da categoria.</param>
+        /// <returns>
+        /// <c>true</c> se existir ao menos uma transação vinculada; caso contrário, <c>false</c>.
+        /// </returns>
+        Task<bool> ExistsByCategoriaIdAsync(int categoriaId);
     }
 }

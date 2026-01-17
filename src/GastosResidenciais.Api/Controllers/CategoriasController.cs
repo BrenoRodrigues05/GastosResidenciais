@@ -28,12 +28,15 @@ namespace GastosResidenciais.Api.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<IActionResult> Create([FromBody] CategoriaCreateDto dto)
         {
-            var id = await _service.CreateAsync(dto);
-
-            return Ok(new
+            try
             {
-                message = "Categoria criada com sucesso!"
-            });
+                await _service.CreateAsync(dto);
+                return Ok(new { message = "Categoria criada com sucesso!" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>Lista todas as categorias cadastradas.</summary>
@@ -72,7 +75,11 @@ namespace GastosResidenciais.Api.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] CategoriaUpdateDto dto)
         {
             var ok = await _service.UpdateAsync(id, dto);
-            return ok ? NoContent() : NotFound(new { error = "Categoria não encontrada." });
+
+            if (!ok)
+                return NotFound(new { message = "Categoria não encontrada." });
+
+            return Ok(new { message = "Categoria atualizada com sucesso!" });
         }
 
         /// <summary>Remove uma categoria existente.</summary>
@@ -84,8 +91,19 @@ namespace GastosResidenciais.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
-            var ok = await _service.DeleteAsync(id);
-            return ok ? NoContent() : NotFound(new { error = "Categoria não encontrada." });
+            try
+            {
+                var ok = await _service.DeleteAsync(id);
+                if (!ok)
+                    return NotFound(new { message = "Categoria não encontrada." });
+
+                return Ok(new { message = "Categoria removida com sucesso!" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // categoria em uso
+                return Conflict(new { message = ex.Message });
+            }
         }
     }
 }
