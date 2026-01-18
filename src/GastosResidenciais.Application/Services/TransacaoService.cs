@@ -136,8 +136,10 @@ namespace GastosResidenciais.Application.Services
                 CategoriaDescricao = t.Categoria.Descricao,
                 CategoriaFinalidade = t.Categoria.Finalidade,
                 PessoaId = t.PessoaId,
-                Data = t.Data,
-                PessoaNome = t.Pessoa.Nome
+                PessoaNome = t.Pessoa.Nome,
+                Data = t.Data.HasValue
+                ? DateTime.SpecifyKind(t.Data.Value, DateTimeKind.Utc)
+                    : null,
             }).ToList();
         }
     }
