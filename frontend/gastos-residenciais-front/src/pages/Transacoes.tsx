@@ -51,10 +51,11 @@ function formatDateTime(value?: string) {
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return '—'
 
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(d)
+ return new Intl.DateTimeFormat('pt-BR', {
+  dateStyle: 'short',
+  timeStyle: 'short',
+  timeZone: 'America/Sao_Paulo',
+}).format(new Date(value))
 }
 
 export default function Transacoes() {
@@ -219,15 +220,21 @@ export default function Transacoes() {
 
                                   {/* 3) Valor */}
                                   <TableCell
-                                    className={
-                                      transacao.tipo === TipoTransacao.Receita
-                                        ? 'text-green-600 dark:text-green-400 font-medium'
-                                        : 'text-red-600 dark:text-red-400 font-medium'
-                                    }
-                                  >
-                                    {transacao.tipo === TipoTransacao.Receita ? '+' : '-'}
-                                    {formatCurrency(transacao.valor)}
-                                  </TableCell>
+                                      className={
+                                        transacao.categoriaFinalidade === 'Ambas'
+                                          ? 'text-blue-600 dark:text-blue-400 font-medium'
+                                          : transacao.tipo === TipoTransacao.Despesa
+                                          ? 'text-red-600 dark:text-red-400 font-medium'
+                                          : 'text-green-600 dark:text-green-400 font-medium'
+                                      }
+                                    >
+                                      {transacao.categoriaFinalidade === 'Ambas'
+                                        ? ''
+                                        : transacao.tipo === TipoTransacao.Despesa
+                                        ? '-'
+                                        : '+'}
+                                      {formatCurrency(transacao.valor)}
+                                    </TableCell>
                                   {/* 3.5) Data/Hora */}
                                 <TableCell className="text-muted-foreground whitespace-nowrap">
                                   {formatDateTime(transacao.data)}
