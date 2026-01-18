@@ -4,7 +4,6 @@ import {
   PessoaListDto,
   PessoaUpdateDto,
   PessoaCreateResponse,
-  ApiErrorDto,
 } from '@/types/api'
 
 export const pessoasService = {

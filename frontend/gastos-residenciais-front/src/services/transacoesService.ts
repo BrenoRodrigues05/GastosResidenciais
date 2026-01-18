@@ -30,8 +30,7 @@ export const transacoesService = {
       id: t.id ?? t.Id,
       descricao: t.descricao ?? t.Descricao,
       valor: t.valor ?? t.Valor,
-
-      // ✅ aqui corrige de vez
+      
       tipo: toTipoTransacao(t.tipo ?? t.Tipo),
 
       categoriaId: t.categoriaId ?? t.CategoriaId,
