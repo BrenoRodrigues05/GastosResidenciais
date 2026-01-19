@@ -1,78 +1,84 @@
-# GastosResidenciais
+# 💰 GastosResidenciais — Sistema de Controle Financeiro Residencial
 
-💰 Gastos Residenciais — Controle Financeiro Residencial
+# Sistema Full Stack desenvolvido como teste técnico, com foco em:
 
-Sistema de controle de gastos residenciais desenvolvido como teste técnico Full Stack, com foco em boas práticas, regras de negócio bem definidas, arquitetura limpa e código legível e testável.
+- Arquitetura limpa e organizada
 
-O projeto é estruturado em monorepo, contendo backend (.NET) e frontend (React + TypeScript) no mesmo repositório.
+- Regras de negócio bem definidas
 
-# 📌 Objetivo do Projeto
+- Código legível e testável
 
- Implementar um sistema capaz de:
+# Integração completa entre Front, API e Banco via Docker
+
+- O projeto é um monorepo, contendo:
+
+- Backend: ASP.NET Core Web API
+
+- Frontend: React + TypeScript
+
+- Banco: MySQL
+
+- Orquestração: Docker Compose
+
+  # 🎯 Objetivo
+
+# Implementar um sistema capaz de:
 
 - Gerenciar pessoas, categorias e transações financeiras
 
-- Aplicar corretamente as regras de negócio
+- Aplicar regras de negócio reais
 
 - Gerar relatórios consolidados
 
 - Persistir dados de forma confiável
 
-- Demonstrar boas práticas em .NET e React
+# 🧱 Estrutura do Projeto
 
-# 📌 Objetivo do Projeto
-
-- Implementar um sistema capaz de:
-
-- Gerenciar pessoas, categorias e transações financeiras
-
-- Aplicar corretamente as regras de negócio
-
-- Gerar relatórios consolidados
-
-- Persistir dados de forma confiável
-
-- Demonstrar boas práticas em .NET e React
-
-# Estrutura do projeto
-
-gastos-residenciais/
+GastosResidenciais/
 │
 ├── src/
-│   ├── GastosResidenciais.Api              # Web API (.NET)
-│   ├── GastosResidenciais.Application      # Regras de negócio, serviços e DTOs
-│   ├── GastosResidenciais.Domain            # Entidades e enums (Domínio)
-│   └── GastosResidenciais.Infrastructure   # EF Core, DbContext e Repositórios
+│   ├── GastosResidenciais.Api            → Web API (.NET)
+│   ├── GastosResidenciais.Application    → Serviços e DTOs
+│   ├── GastosResidenciais.Domain         → Entidades e regras
+│   └── GastosResidenciais.Infrastructure → EF Core e Repositórios
 │
 ├── tests/
-│   ├── GastosResidenciais.Domain.Tests
-│   └── GastosResidenciais.Application.Tests
+│   ├── Domain.Tests
+│   └── Application.Tests
 │
-└── frontend/                                # React + TypeScript
+└── frontend/
+    └── gastos-residenciais-front → React + TypeScript
 
-# ⚙️ Tecnologias Utilizadas
+# 🛠 Tecnologias
+# Backend
 
-- Backend
+- .NET 9
 
-.NET 8 / 9
+- ASP.NET Core Web API
 
-ASP.NET Core Web API
+- Entity Framework Core
 
-Entity Framework Core
+- MySQL
 
-MySQL
+- xUnit
 
-xUnit (testes unitários)
+- Swagger
 
-- Frontend
+# Frontend
 
-React
+- React
 
-TypeScript
+- TypeScript
 
-Vite
+- Vite
 
-# Arquitetura & Boas Práticas
+- React Query
+
+- Axios
+
+- Tailwind + shadcn/ui
+
+# Arquitetura
 
 - Clean Architecture
 
@@ -84,42 +90,30 @@ Vite
 
 - DTOs
 
-- XML Documentation
+- Validações de domínio
 
-- Testes unitários com repositórios fake
+- Testes com repositórios fake
 
-# 📚 Funcionalidades Implementadas
-👤 Cadastro de Pessoas
-
-- Criar
-
-- Listar
-
-- Deletar
-
-- Cascade delete: ao remover uma pessoa, suas transações também são removidas
-
-# Campos:
-
-- Id (gerado automaticamente)
-
-- Nome
-
-- Idade
-
-# 🗂 Cadastro de Categorias
+# 📦 Funcionalidades
+# 👤 Pessoas
 
 - Criar
 
 - Listar
 
-- Campos:
+- Excluir
 
-- Id
+- Cascade delete das transações
 
-- Descrição
+- Campos: Id, Nome, Idade
 
-# Finalidade:
+# 🗂 Categorias
+
+- Criar
+
+- Listar
+
+- Finalidade:
 
 - Despesa
 
@@ -127,160 +121,173 @@ Vite
 
 - Ambas
 
-# 💸 Cadastro de Transações
+# 💸 Transações
 
 - Criar
 
 - Listar
 
-# Campos:
+# Validações:
 
-- Id
+- Valor positivo
 
-- Descrição
+- Categoria compatível com tipo
 
-- Valor (decimal positivo)
+- Menores de 18 → apenas despesas
 
-- Tipo (Despesa ou Receita)
+# 📊 Relatórios
 
-- Categoria
-
-- Pessoa
-
-# Regras de Negócio Aplicadas
-
-- Pessoas menores de 18 anos só podem cadastrar despesas
-
-- A categoria deve ser compatível com o tipo da transação
-
-Ex: Receita não pode usar categoria de Despesa
-
-# 📊 Relatórios Financeiros
-- Totais por Pessoa
-
-# Para cada pessoa:
+- Totais por pessoa
 
 - Total de receitas
 
 - Total de despesas
 
-- Saldo (receita − despesa)
+- Saldo individual
 
-- Total Geral
+- Total geral consolidado
 
-- Soma de todas as receitas
+# 🧠 Regras de Negócio
 
-- Soma de todas as despesas
+- Menores de 18 anos só podem registrar DESPESAS
 
-- Saldo geral
+- Categoria deve ser compatível com o tipo
 
+- Exclusão de pessoa remove suas transações
+
+- Saldo = Receitas − Despesas
+ 
 # 🧪 Testes Automatizados
+- Cobertura
 
-- O projeto possui testes unitários reais, focados nas regras de negócio:
+- Validação de entidades
 
-- Tipos de testes
+- Regras do TransacaoService
 
-- Validação de entidades do domínio
+- Cálculo do RelatorioService
 
-- Regras de negócio do TransacaoService
+# Estratégia
 
-- Cálculo de relatórios no RelatorioService
+- Repositórios fake em memória
 
-- Estratégia
+- Sem dependência de banco
 
-- Uso de repositórios fake em memória
+- Testes rápidos e determinísticos
+- 
+- Demonstrar boas práticas de desenvolvimento moderno
 
-- Sem dependência de banco de dados
+# dotnet test
 
-- Testes rápidos, determinísticos e legíveis
+# 🚀 Executando com Docker (RECOMENDADO)
 
-# Para rodar os testes:
+# Pré-requisitos
 
-- dotnet test
+- Docker Desktop
 
-# 🛠️ Como Executar o Projeto
-Backend
+# Subir tudo
+- docker compose up --build
 
-# Configure a connection string no arquivo:
+# Acessos
 
-src/GastosResidenciais.Api/appsettings.Development.json
+| Serviço   | URL                                                                    |
+| --------- | ---------------------------------------------------------------------- |
+| Frontend  | [http://localhost:5173](http://localhost:5173)                         |
+| Swagger   | [http://localhost:7108/swagger](http://localhost:7108/swagger)         |
+| Proxy API | [http://localhost:5173/api/Pessoas](http://localhost:5173/api/Pessoas) |
 
+# Parar
 
-# Exemplo:
+- docker compose down
 
-{
-  "ConnectionStrings": {
-    "Default": "Server=localhost;Port=3306;Database=gastos_residenciais;Uid=root;Pwd=SUA_SENHA;"
-  }
-}
+# Resetar banco
 
+- docker compose down -v
 
-# Execute as migrations:
+# 🧪 Roteiro de Teste
 
-dotnet ef database update \
-  --project src/GastosResidenciais.Infrastructure \
-  --startup-project src/GastosResidenciais.Api
+# 1) Teste via Swagger
 
+- Criar Pessoa
 
-# Inicie a API:
+- Criar Categoria
 
-dotnet run --project src/GastosResidenciais.Api
+- Criar Transação
 
+- Consultar Relatórios
 
-- A API ficará disponível em:
+# 2) Teste via Front
 
-https://localhost:7108
+- Abrir http://localhost:5173
 
-http://localhost:5277
+- Cadastrar Pessoa
 
-# Frontend
-cd frontend
-npm install
-npm run dev
+- Cadastrar Categoria
 
-# 📖 Documentação
+- Cadastrar Transação
 
-- Código documentado com XML Documentation
+- Validar relatório e saldo
 
-- Comentários focados em intenção e regras de negócio
+# 3) Teste de Persistência
 
-- Separação clara entre código de produção e código de teste
+docker compose down
+docker compose up -d
 
-# 🧠 Decisões Técnicas Importantes
+# 🌐 Endpoints Principais
 
-- Regras de negócio concentradas na camada Application
+- GET /api/Pessoas
 
-- Entidades com validações básicas (invariantes)
+- POST /api/Pessoas
+
+- GET /api/Categorias
+
+- POST /api/Categorias
+
+- GET /api/Transacoes
+
+- POST /api/Transacoes
+
+- GET /api/Relatorios
+
+# 🧾 Decisões Técnicas
+
+- Regras concentradas na camada Application
+
+- Domínio com invariantes
 
 - Repositórios sem lógica de negócio
 
-- Unit of Work controlando persistência
+- UnitOfWork para consistência
 
-- FakeRepositories para testes isolados
+- DTOs isolando API do domínio
 
-- Cascade delete configurado no DbContext
+- Monorepo para avaliação facilitada
 
-- Monorepo para facilitar entrega e avaliação
+- Docker para execução em 1 comando
 
-# 🚀 Considerações Finais
+# 📚 Documentação
 
-- Este projeto foi desenvolvido com foco em:
+- XML Docs no backend
 
-- Clareza de código
+- Swagger documentado
 
-- Manutenibilidade
+- Mensagens de erro padronizadas
 
-- Boas práticas de mercado
+- Validações amigáveis
 
-- Aderência total aos requisitos do teste técnico
+# 🚧 Possíveis Evoluções
 
-- Recursos adicionais poderiam ser facilmente adicionados sem impactar a estrutura atual.
+- Autenticação JWT
+
+- Paginação e filtros
+
+- Cache de relatórios
+
+- Testes E2E
+
+- Pipeline CI/CD
 
 # 👤 Autor
 
-Breno Rodrigues
+Breno Rodrigues Dos Santos
 Desenvolvedor Full Stack
 C# • .NET • React • TypeScript
-
-
-
