@@ -1,0 +1,51 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: gastosresidenciais_db
+    environment:
+      MYSQL_ROOT_PASSWORD: 05121999
+      MYSQL_DATABASE: GastosDB
+
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: app123
+
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p05121999 --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  api:
+    build:
+      context: .
+      dockerfile: src/GastosResidenciais.Api/Dockerfile
+    container_name: gastosresidenciais_api
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "server=db;database=GastosDB;uid=appuser;pwd=app123"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "7108:8080"
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/gastos-residenciais-front/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:7108
+    container_name: gastosresidenciais_web
+    depends_on:
+      - api
+    ports:
+      - "5173:80"
+
+volumes:
+  db_data:
