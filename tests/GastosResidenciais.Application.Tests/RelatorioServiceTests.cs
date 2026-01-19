@@ -19,11 +19,9 @@ namespace GastosResidenciais.Application.Tests
             SetId(p1, 1);
             SetId(p2, 2);
 
-            // Categoria (qualquer, aqui não importa finalidade)
             var cat = new Categoria("Geral", FinalidadeCategoria.Ambas);
             SetId(cat, 1);
 
-            // Transacoes (adiciona na lista interna da pessoa via reflection)
             AddTransacao(p1, new Transacao("Salario", 1000m, TipoTransacao.Receita, 1, 1, null));
             AddTransacao(p1, new Transacao("Mercado", 200m, TipoTransacao.Despesa, 1, 1, null));
 

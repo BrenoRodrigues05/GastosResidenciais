@@ -73,7 +73,7 @@ namespace GastosResidenciais.Application.Tests
 
             var dto = new CategoriaCreateDto
             {
-                Descricao = "  mercado  ", // deve bater pelo ExistsByDescricaoAsync case-insensitive
+                Descricao = "  mercado  ", 
                 Finalidade = FinalidadeCategoria.Despesa
             };
 
@@ -204,7 +204,7 @@ namespace GastosResidenciais.Application.Tests
                 new Categoria("Mercado", FinalidadeCategoria.Despesa)
             );
             var uow = new FakeUnitOfWork();
-            var transacoes = new FakeTransacaoRepository(); // vazio => não está em uso
+            var transacoes = new FakeTransacaoRepository(); 
             var service = new CategoriaService(repo, uow, transacoes);
 
             // Act
@@ -228,7 +228,7 @@ namespace GastosResidenciais.Application.Tests
             var uow = new FakeUnitOfWork();
 
             var transacoes = new FakeTransacaoRepository();
-            // cria 1 transação vinculada à categoria 1 para simular "em uso"
+      
             await transacoes.AddAsync(new Transacao("Teste", 10m, TipoTransacao.Despesa, 1, 1, null));
 
             var service = new CategoriaService(repo, uow, transacoes);
@@ -241,7 +241,7 @@ namespace GastosResidenciais.Application.Tests
             Assert.Equal(0, uow.SaveCalls);
 
             var categoria = await repo.GetByIdAsync(1);
-            Assert.NotNull(categoria); // não removeu
+            Assert.NotNull(categoria); 
         }
 
         [Fact]

@@ -61,7 +61,7 @@ namespace GastosResidenciais.Application.Tests
             // Arrange
             var p1 = new Pessoa("Breno", 25);
 
-            var repo = new FakePessoaRepository(p1); // vira Id=1 no fake
+            var repo = new FakePessoaRepository(p1); 
             var uow = new FakeUnitOfWork();
             var service = new PessoaService(repo, uow);
 
@@ -96,7 +96,7 @@ namespace GastosResidenciais.Application.Tests
             // Arrange
             var p1 = new Pessoa("Breno", 25);
 
-            var repo = new FakePessoaRepository(p1); // Id=1
+            var repo = new FakePessoaRepository(p1); 
             var uow = new FakeUnitOfWork();
             var service = new PessoaService(repo, uow);
 
@@ -147,7 +147,7 @@ namespace GastosResidenciais.Application.Tests
             // Arrange
             var p1 = new Pessoa("Breno", 25);
 
-            var repo = new FakePessoaRepository(p1); // Id=1
+            var repo = new FakePessoaRepository(p1); 
             var uow = new FakeUnitOfWork();
             var service = new PessoaService(repo, uow);
 

@@ -49,7 +49,7 @@ namespace GastosResidenciais.Application.Tests
                 Valor = 200,
                 Tipo = TipoTransacao.Despesa,
                 PessoaId = 1,
-                CategoriaId = 1 // categoria é Receita, mas transacao é Despesa
+                CategoriaId = 1 
             };
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateAsync(dto));

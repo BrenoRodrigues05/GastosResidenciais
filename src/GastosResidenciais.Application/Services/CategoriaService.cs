@@ -26,7 +26,6 @@ namespace GastosResidenciais.Application.Services
         /// </summary>
         public async Task<int> CreateAsync(CategoriaCreateDto dto)
         {
-            // Validação do Enum
             if (!Enum.IsDefined(typeof(FinalidadeCategoria), dto.Finalidade))
                 throw new InvalidOperationException("Finalidade inválida. Valores permitidos: 1-Despesa, 2-Receita, 3-Ambas.");
 
@@ -89,8 +88,6 @@ namespace GastosResidenciais.Application.Services
             var categoria = await _categorias.GetByIdAsync(id);
             if (categoria is null)
                 return false;
-
-            // Atualização via método da entidade (respeitando encapsulamento)
             categoria.Atualizar(dto.Descricao, dto.Finalidade);
 
             _categorias.Update(categoria);

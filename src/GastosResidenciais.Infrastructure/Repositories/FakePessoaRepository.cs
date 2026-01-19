@@ -47,7 +47,6 @@ namespace GastosResidenciais.Infrastructure.Repositories
 
         public void Remove(Pessoa pessoa)
         {
-            // Remover por Id é mais seguro do que por referência
             _pessoas.RemoveAll(x => x.Id == pessoa.Id);
         }
 
