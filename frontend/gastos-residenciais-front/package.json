@@ -1,13 +1,22 @@
 {
-  "name": "react-vite-template",
+  "name": "gastos-residenciais-app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+
+   "description": "Frontend do sistema de controle de gastos residenciais, desenvolvido com React, TypeScript, Vite e React Query.",
+  "author": "Breno Rodrigues",
+  "license": "MIT",
+
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+
+  "test": "vitest",
+  "test:ui": "vitest --ui",
+  "test:run": "vitest run",
+  "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -25,6 +34,10 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20.10.6",
     "@types/react": "^18.2.47",
     "@types/react-dom": "^18.2.18",
@@ -35,9 +48,11 @@
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "jsdom": "^27.4.0",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
-    "vite": "^5.0.11"
+    "vite": "^5.0.11",
+    "vitest": "^4.0.17"
   }
 }

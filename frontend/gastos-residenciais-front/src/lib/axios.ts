@@ -11,11 +11,6 @@ const api = axios.create({
 // Interceptor de requisição
 api.interceptors.request.use(
   (config) => {
-    // Aqui você pode adicionar tokens de autenticação, por exemplo:
-    // const token = localStorage.getItem('token')
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
     return config
   },
   (error) => {
@@ -33,7 +28,6 @@ api.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          // Redirecionar para login ou limpar tokens
           console.error('Não autorizado')
           break
         case 403:
