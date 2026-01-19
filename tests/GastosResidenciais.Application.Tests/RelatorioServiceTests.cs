@@ -24,12 +24,12 @@ namespace GastosResidenciais.Application.Tests
             SetId(cat, 1);
 
             // Transacoes (adiciona na lista interna da pessoa via reflection)
-            AddTransacao(p1, new Transacao("Salario", 1000m, TipoTransacao.Receita, 1, 1));
-            AddTransacao(p1, new Transacao("Mercado", 200m, TipoTransacao.Despesa, 1, 1));
+            AddTransacao(p1, new Transacao("Salario", 1000m, TipoTransacao.Receita, 1, 1, null));
+            AddTransacao(p1, new Transacao("Mercado", 200m, TipoTransacao.Despesa, 1, 1, null));
 
-            AddTransacao(p2, new Transacao("Freela", 500m, TipoTransacao.Receita, 1, 2));
-            AddTransacao(p2, new Transacao("Luz", 100m, TipoTransacao.Despesa, 1, 2));
-            AddTransacao(p2, new Transacao("Internet", 50m, TipoTransacao.Despesa, 1, 2));
+            AddTransacao(p2, new Transacao("Freela", 500m, TipoTransacao.Receita, 1, 2, null));
+            AddTransacao(p2, new Transacao("Luz", 100m, TipoTransacao.Despesa, 1, 2, null));
+            AddTransacao(p2, new Transacao("Internet", 50m, TipoTransacao.Despesa, 1, 2, null));
 
             var pessoasRepo = new FakePessoaRepository(p1, p2);
 
@@ -67,5 +67,4 @@ namespace GastosResidenciais.Application.Tests
             list.Add(t);
         }
     }
-
 }
