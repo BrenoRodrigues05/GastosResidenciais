@@ -288,6 +288,6 @@ docker compose up -d
 
 # 👤 Autor
 
-Breno Rodrigues Dos Santos
+Breno Rodrigues Dos Santos -
 Desenvolvedor Full Stack
 C# • .NET • React • TypeScript
