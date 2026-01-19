@@ -9,7 +9,7 @@ import { pessoasService } from '@/services/pessoasService'
 import { categoriasService } from '@/services/categoriasService'
 import { TipoTransacao } from '@/types/api'
 
-// Mock do toast (hook)
+// Mock do toast 
 const toastMock = vi.fn()
 vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({ toast: toastMock }),
@@ -75,57 +75,52 @@ describe('Transacoes Page', () => {
     ).toBeInTheDocument()
   })
 
-  it('deve abrir o dialog e criar transação (sucesso) invalidando queries e chamando toast', async () => {
-    const user = userEvent.setup()
-    const client = createTestQueryClient()
+  it('deve abrir o dialog e criar transação (sucesso) invalidando queries e abrindo modal de sucesso', async () => {
+  const user = userEvent.setup()
+  const client = createTestQueryClient()
 
-    ;(transacoesService.listar as any).mockResolvedValue([])
-    ;(pessoasService.listar as any).mockResolvedValue([
-      { id: 1, nome: 'Ana', idade: 25 },
-    ])
-    ;(categoriasService.listar as any).mockResolvedValue([
-      { id: 10, descricao: 'Casa', finalidade: 'Despesa' },
-      { id: 11, descricao: 'Salário', finalidade: 'Receita' },
-      { id: 12, descricao: 'Ambas', finalidade: 'Ambas' },
-    ])
+  ;(transacoesService.listar as any).mockResolvedValue([])
+  ;(pessoasService.listar as any).mockResolvedValue([{ id: 1, nome: 'Ana', idade: 25 }])
+  ;(categoriasService.listar as any).mockResolvedValue([
+    { id: 10, descricao: 'Casa', finalidade: 'Despesa' },
+    { id: 11, descricao: 'Salário', finalidade: 'Receita' },
+    { id: 12, descricao: 'Ambas', finalidade: 'Ambas' },
+  ])
 
-    ;(transacoesService.criar as any).mockResolvedValue({ id: 100 })
+  ;(transacoesService.criar as any).mockResolvedValue({ id: 100 })
 
-    const invalidateSpy = vi.spyOn(client, 'invalidateQueries')
+  const invalidateSpy = vi.spyOn(client, 'invalidateQueries')
 
-    renderWithClient(<Transacoes />, client)
+  renderWithClient(<Transacoes />, client)
 
-    await user.click(screen.getByRole('button', { name: /nova transação/i }))
+  await user.click(screen.getByRole('button', { name: /nova transação/i }))
+  const dialog = screen.getByRole('dialog')
 
-    const dialog = screen.getByRole('dialog')
+  await user.type(within(dialog).getByLabelText(/descrição/i), 'Conta de luz')
+  await user.type(within(dialog).getByLabelText(/valor/i), '99.90')
 
-    await user.type(within(dialog).getByLabelText(/descrição/i), 'Conta de luz')
-    await user.type(within(dialog).getByLabelText(/valor/i), '99.90')
+  await user.selectOptions(within(dialog).getByLabelText(/^pessoa$/i), '1')
+  await user.selectOptions(within(dialog).getByLabelText(/^categoria$/i), '10')
 
-    // Tipo default é Despesa (do state inicial). Seleciona pessoa e categoria.
-    await user.selectOptions(within(dialog).getByLabelText(/^pessoa$/i), '1')
+  await user.click(within(dialog).getByRole('button', { name: /^criar$/i }))
 
-    // Categoria deve permitir Despesa + Ambas
-    await user.selectOptions(within(dialog).getByLabelText(/^categoria$/i), '10')
+  expect(transacoesService.criar).toHaveBeenCalledWith(
+    expect.objectContaining({
+      descricao: 'Conta de luz',
+      valor: 99.9,
+      tipo: TipoTransacao.Despesa,
+      categoriaId: 10,
+      pessoaId: 1,
+    })
+  )
 
-    await user.click(within(dialog).getByRole('button', { name: /^criar$/i }))
+  expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['transacoes'] })
+  expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['relatorios'] })
 
-    expect(transacoesService.criar).toHaveBeenCalledWith(
-      expect.objectContaining({
-        descricao: 'Conta de luz',
-        valor: 99.9,
-        tipo: TipoTransacao.Despesa,
-        categoriaId: 10,
-        pessoaId: 1,
-      })
-    )
+  expect(await screen.findByText(/transação criada/i)).toBeInTheDocument()
 
-    // invalida transacoes e relatorios
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['transacoes'] })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['relatorios'] })
-
-    expect(toastMock).toHaveBeenCalledWith('Transação criada com sucesso!')
-  })
+  expect(toastMock).toHaveBeenCalledTimes(0)
+})
 
   it('deve bloquear Receita para menor de 18 (mostra alerta e desabilita o botão Criar)', async () => {
     const user = userEvent.setup()
@@ -149,13 +144,11 @@ describe('Transacoes Page', () => {
 
     await user.selectOptions(within(dialog).getByLabelText(/^pessoa$/i), '1')
 
-    // Muda tipo para Receita
     await user.selectOptions(
       within(dialog).getByLabelText(/^tipo$/i),
       String(TipoTransacao.Receita)
     )
 
-    // Deve mostrar aviso
     expect(
       within(dialog).getByText(/menores de 18 anos não podem cadastrar receita/i)
     ).toBeInTheDocument()
@@ -163,7 +156,6 @@ describe('Transacoes Page', () => {
     const botaoCriar = within(dialog).getByRole('button', { name: /^criar$/i })
     expect(botaoCriar).toBeDisabled()
 
-    // Não deve chamar criar nem toast, porque submit não acontece com botão disabled
     expect(transacoesService.criar).toHaveBeenCalledTimes(0)
     expect(toastMock).toHaveBeenCalledTimes(0)
   })
@@ -186,14 +178,12 @@ describe('Transacoes Page', () => {
     await user.click(screen.getByRole('button', { name: /nova transação/i }))
     const dialog = screen.getByRole('dialog')
 
-    // Default: Despesa => deve mostrar DespesaCat e AmbasCat, NÃO ReceitaCat
     const categoriaSelect = within(dialog).getByLabelText(/^categoria$/i)
 
     expect(within(categoriaSelect).queryByText('DespesaCat')).toBeInTheDocument()
     expect(within(categoriaSelect).queryByText('AmbasCat')).toBeInTheDocument()
     expect(within(categoriaSelect).queryByText('ReceitaCat')).not.toBeInTheDocument()
 
-    // Muda para Receita => deve mostrar ReceitaCat e AmbasCat, NÃO DespesaCat
     await user.selectOptions(
       within(dialog).getByLabelText(/^tipo$/i),
       String(TipoTransacao.Receita)

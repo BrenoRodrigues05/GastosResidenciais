@@ -1,12 +1,10 @@
 import { useState } from 'react'
+import type { AxiosError } from 'axios'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { transacoesService } from '@/services/transacoesService'
 import { pessoasService } from '@/services/pessoasService'
 import { categoriasService } from '@/services/categoriasService'
-import {
-  TransacaoCreateDto,
-  TipoTransacao,
-} from '@/types/api'
+import { TransacaoCreateDto, TipoTransacao } from '@/types/api'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -35,7 +33,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Plus, Loader2, AlertCircle } from 'lucide-react'
-import { useToast } from '@/hooks/useToast'
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('pt-BR', {
@@ -44,24 +41,45 @@ function formatCurrency(value: number): string {
   }).format(value)
 }
 
-// Função para horário aparecer no card
 function formatDateTime(value?: string) {
   if (!value) return '—'
-
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return '—'
 
- return new Intl.DateTimeFormat('pt-BR', {
-  dateStyle: 'short',
-  timeStyle: 'short',
-  timeZone: 'America/Sao_Paulo',
-}).format(new Date(value))
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+    timeZone: 'America/Sao_Paulo',
+  }).format(new Date(value))
+}
+
+const getApiMessage = (err: unknown) => {
+  const axiosErr = err as AxiosError<any>
+  return (
+    axiosErr?.response?.data?.message ||
+    axiosErr?.response?.data?.error ||
+    'Erro ao criar transação.'
+  )
+}
+
+type SuccessInfo = {
+  descricao: string
+  valor: number
+  tipo: 'Despesa' | 'Receita'
+  pessoa: string
+  categoria: string
+  data: string
 }
 
 export default function Transacoes() {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
+
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [modalError, setModalError] = useState<string | null>(null)
+
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false)
+  const [successInfo, setSuccessInfo] = useState<SuccessInfo | null>(null)
+
   const [formData, setFormData] = useState({
     descricao: '',
     valor: '',
@@ -86,39 +104,18 @@ export default function Transacoes() {
     queryFn: categoriasService.listar,
   })
 
-  // Filtrar categorias compatíveis com o tipo selecionado
   const categoriasDisponiveis = categorias?.filter((cat) => {
-  const tipo = parseInt(formData.tipo) as TipoTransacao
+    const tipo = parseInt(formData.tipo) as TipoTransacao
 
-  if (tipo === TipoTransacao.Despesa) {
-    return cat.finalidade === 'Despesa' || cat.finalidade === 'Ambas'
-  }
+    if (tipo === TipoTransacao.Despesa) {
+      return cat.finalidade === 'Despesa' || cat.finalidade === 'Ambas'
+    }
 
-  return cat.finalidade === 'Receita' || cat.finalidade === 'Ambas'
-})
-
-  // Verificar se a pessoa selecionada pode cadastrar receita
-  const pessoaSelecionada = pessoas?.find(
-    (p) => p.id.toString() === formData.pessoaId
-  )
-  const podeCadastrarReceita =
-    !pessoaSelecionada || pessoaSelecionada.idade >= 18
-
-  const criarMutation = useMutation({
-    mutationFn: (dados: TransacaoCreateDto) => transacoesService.criar(dados),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transacoes'] })
-      queryClient.invalidateQueries({ queryKey: ['relatorios'] })
-      setIsDialogOpen(false)
-      resetForm()
-      toast('Transação criada com sucesso!')
-    },
-    onError: (error: any) => {
-      const message =
-        error.response?.data?.error || 'Erro ao criar transação'
-      toast(message, 'error')
-    },
+    return cat.finalidade === 'Receita' || cat.finalidade === 'Ambas'
   })
+
+  const pessoaSelecionada = pessoas?.find((p) => p.id.toString() === formData.pessoaId)
+  const podeCadastrarReceita = !pessoaSelecionada || pessoaSelecionada.idade >= 18
 
   const resetForm = () => {
     setFormData({
@@ -129,16 +126,48 @@ export default function Transacoes() {
       pessoaId: '',
       data: '',
     })
+    setModalError(null)
   }
+
+  const criarMutation = useMutation({
+    mutationFn: (dados: TransacaoCreateDto) => transacoesService.criar(dados),
+    onSuccess: () => {
+      const tipoNum = parseInt(formData.tipo) as TipoTransacao
+      const pessoaNome =
+        pessoas?.find((p) => p.id.toString() === formData.pessoaId)?.nome ?? '—'
+      const categoriaNome =
+        categorias?.find((c) => c.id.toString() === formData.categoriaId)?.descricao ?? '—'
+
+      setSuccessInfo({
+        descricao: formData.descricao,
+        valor: Number(formData.valor || 0),
+        tipo: tipoNum === TipoTransacao.Despesa ? 'Despesa' : 'Receita',
+        pessoa: pessoaNome,
+        categoria: categoriaNome,
+        data: formData.data ? formData.data : 'Agora',
+      })
+
+      queryClient.invalidateQueries({ queryKey: ['transacoes'] })
+      queryClient.invalidateQueries({ queryKey: ['relatorios'] })
+
+      setIsDialogOpen(false)
+      resetForm()
+      setIsSuccessDialogOpen(true)
+    },
+    onError: (error: unknown) => {
+      const message = getApiMessage(error)
+      setModalError(message)
+    },
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     const tipo = parseInt(formData.tipo) as TipoTransacao
 
-    // Validação: menores de 18 não podem cadastrar receita
     if (tipo === TipoTransacao.Receita && !podeCadastrarReceita) {
-      toast('Menores de 18 anos não podem cadastrar Receita', 'error')
+      const msg = 'Menores de 18 anos não podem cadastrar Receita'
+      setModalError(msg)
       return
     }
 
@@ -159,11 +188,15 @@ export default function Transacoes() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Transações</h1>
-          <p className="text-muted-foreground">
-            Gerencie as transações financeiras
-          </p>
+          <p className="text-muted-foreground">Gerencie as transações financeiras</p>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)}>
+
+        <Button
+          onClick={() => {
+            setModalError(null)
+            setIsDialogOpen(true)
+          }}
+        >
           <Plus className="mr-2 h-4 w-4" />
           Nova Transação
         </Button>
@@ -172,10 +205,9 @@ export default function Transacoes() {
       <Card>
         <CardHeader>
           <CardTitle>Lista de Transações</CardTitle>
-          <CardDescription>
-            Todas as transações cadastradas no sistema
-          </CardDescription>
+          <CardDescription>Todas as transações cadastradas no sistema</CardDescription>
         </CardHeader>
+
         <CardContent>
           {isLoadingTransacoes ? (
             <div className="flex items-center justify-center py-8">
@@ -183,76 +215,70 @@ export default function Transacoes() {
             </div>
           ) : transacoes && transacoes.length > 0 ? (
             <div className="overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Descrição</TableHead>
-                                <TableHead>Finalidade</TableHead>
-                                <TableHead>Valor</TableHead>
-                                <TableHead>Data/Hora</TableHead>
-                                <TableHead>Categoria</TableHead>
-                                <TableHead>Pessoa</TableHead>
-                              </TableRow>
-                            </TableHeader>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead>Finalidade</TableHead>
+                    <TableHead>Valor</TableHead>
+                    <TableHead>Data/Hora</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead>Pessoa</TableHead>
+                  </TableRow>
+                </TableHeader>
 
-                            <TableBody>
-                              {transacoes.map((transacao) => (
-                                <TableRow key={transacao.id}>
-                                  {/* 1) Descrição */}
-                                  <TableCell className="font-semibold text-base md:text-lg">
-                                    {transacao.descricao}
-                                  </TableCell>
+                <TableBody>
+                  {transacoes.map((transacao) => (
+                    <TableRow key={transacao.id}>
+                      <TableCell className="font-semibold text-base md:text-lg">
+                        {transacao.descricao}
+                      </TableCell>
 
-                                  {/* 2) Finalidade */}
-                                  <TableCell>
-                                  <span
-                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                      transacao.categoriaFinalidade === 'Despesa'
-                                        ? 'bg-red-100 text-red-700 dark:bg-red-900/30'
-                                        : transacao.categoriaFinalidade === 'Receita'
-                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30'
-                                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30'
-                                    }`}
-                                  >
-                                    {transacao.categoriaFinalidade}
-                                  </span>
-                                </TableCell>
+                      <TableCell>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            transacao.categoriaFinalidade === 'Despesa'
+                              ? 'bg-red-100 text-red-700 dark:bg-red-900/30'
+                              : transacao.categoriaFinalidade === 'Receita'
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30'
+                              : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30'
+                          }`}
+                        >
+                          {transacao.categoriaFinalidade}
+                        </span>
+                      </TableCell>
 
-                                  {/* 3) Valor */}
-                                  <TableCell
-                                      className={
-                                        transacao.categoriaFinalidade === 'Ambas'
-                                          ? 'text-blue-600 dark:text-blue-400 font-medium'
-                                          : transacao.tipo === TipoTransacao.Despesa
-                                          ? 'text-red-600 dark:text-red-400 font-medium'
-                                          : 'text-green-600 dark:text-green-400 font-medium'
-                                      }
-                                    >
-                                      {transacao.categoriaFinalidade === 'Ambas'
-                                        ? ''
-                                        : transacao.tipo === TipoTransacao.Despesa
-                                        ? '-'
-                                        : '+'}
-                                      {formatCurrency(transacao.valor)}
-                                    </TableCell>
-                                  {/* 3.5) Data/Hora */}
-                                <TableCell className="text-muted-foreground whitespace-nowrap">
-                                  {formatDateTime(transacao.data)}
-                                </TableCell>
+                      <TableCell
+                        className={
+                          transacao.categoriaFinalidade === 'Ambas'
+                            ? 'text-blue-600 dark:text-blue-400 font-medium'
+                            : transacao.tipo === TipoTransacao.Despesa
+                            ? 'text-red-600 dark:text-red-400 font-medium'
+                            : 'text-green-600 dark:text-green-400 font-medium'
+                        }
+                      >
+                        {transacao.categoriaFinalidade === 'Ambas'
+                          ? ''
+                          : transacao.tipo === TipoTransacao.Despesa
+                          ? '-'
+                          : '+'}
+                        {formatCurrency(transacao.valor)}
+                      </TableCell>
 
-                                  {/* 4) Categoria */}
-                                  <TableCell>{transacao.categoriaDescricao}</TableCell>
+                      <TableCell className="text-muted-foreground whitespace-nowrap">
+                        {formatDateTime(transacao.data)}
+                      </TableCell>
 
-                                  {/* 5) Pessoa */}
-                                    <TableCell className="font-semibold text-base md:text-lg">
-                                    {transacao.pessoaNome || '—'}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
+                      <TableCell>{transacao.categoriaDescricao}</TableCell>
 
-                </div>              
+                      <TableCell className="font-semibold text-base md:text-lg">
+                        {transacao.pessoaNome || '—'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <p className="py-8 text-center text-muted-foreground">
               Nenhuma transação cadastrada. Clique em "Nova Transação" para começar.
@@ -261,7 +287,14 @@ export default function Transacoes() {
         </CardContent>
       </Card>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {/* Modal de criar transação */}
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open)
+          if (!open) resetForm()
+        }}
+      >
         <DialogContent className="max-w-2xl">
           <form onSubmit={handleSubmit}>
             <DialogHeader>
@@ -270,15 +303,23 @@ export default function Transacoes() {
                 Preencha os dados para criar uma nova transação financeira
               </DialogDescription>
             </DialogHeader>
+
+            {modalError && (
+              <div className="mt-3 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {modalError}
+              </div>
+            )}
+
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="descricao">Descrição</Label>
                 <Input
                   id="descricao"
                   value={formData.descricao}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    setModalError(null)
                     setFormData({ ...formData, descricao: e.target.value })
-                  }
+                  }}
                   required
                 />
               </div>
@@ -292,9 +333,10 @@ export default function Transacoes() {
                     step="0.01"
                     min="0"
                     value={formData.valor}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      setModalError(null)
                       setFormData({ ...formData, valor: e.target.value })
-                    }
+                    }}
                     required
                   />
                 </div>
@@ -305,10 +347,11 @@ export default function Transacoes() {
                     id="tipo"
                     value={formData.tipo}
                     onChange={(e) => {
+                      setModalError(null)
                       setFormData({
                         ...formData,
                         tipo: e.target.value,
-                        categoriaId: '', // Reset categoria ao mudar tipo
+                        categoriaId: '',
                       })
                     }}
                     required
@@ -324,9 +367,10 @@ export default function Transacoes() {
                 <Select
                   id="pessoaId"
                   value={formData.pessoaId}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    setModalError(null)
                     setFormData({ ...formData, pessoaId: e.target.value })
-                  }
+                  }}
                   required
                 >
                   <option value="">Selecione uma pessoa</option>
@@ -336,13 +380,13 @@ export default function Transacoes() {
                     </option>
                   ))}
                 </Select>
-                {parseInt(formData.tipo) === TipoTransacao.Receita &&
-                  !podeCadastrarReceita && (
-                    <div className="flex items-center gap-2 text-sm text-destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      Menores de 18 anos não podem cadastrar Receita
-                    </div>
-                  )}
+
+                {parseInt(formData.tipo) === TipoTransacao.Receita && !podeCadastrarReceita && (
+                  <div className="flex items-center gap-2 text-sm text-destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    Menores de 18 anos não podem cadastrar Receita
+                  </div>
+                )}
               </div>
 
               <div className="grid gap-2">
@@ -350,16 +394,15 @@ export default function Transacoes() {
                 <Select
                   id="categoriaId"
                   value={formData.categoriaId}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    setModalError(null)
                     setFormData({ ...formData, categoriaId: e.target.value })
-                  }
+                  }}
                   required
                   disabled={!formData.tipo}
                 >
                   <option value="">
-                    {formData.tipo
-                      ? 'Selecione uma categoria'
-                      : 'Selecione primeiro o tipo'}
+                    {formData.tipo ? 'Selecione uma categoria' : 'Selecione primeiro o tipo'}
                   </option>
                   {categoriasDisponiveis?.map((categoria) => (
                     <option key={categoria.id} value={categoria.id}>
@@ -375,12 +418,14 @@ export default function Transacoes() {
                   id="data"
                   type="datetime-local"
                   value={formData.data}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    setModalError(null)
                     setFormData({ ...formData, data: e.target.value })
-                  }
+                  }}
                 />
               </div>
             </div>
+
             <DialogFooter>
               <Button
                 type="button"
@@ -392,12 +437,12 @@ export default function Transacoes() {
               >
                 Cancelar
               </Button>
+
               <Button
                 type="submit"
                 disabled={
                   criarMutation.isPending ||
-                  (parseInt(formData.tipo) === TipoTransacao.Receita &&
-                    !podeCadastrarReceita)
+                  (parseInt(formData.tipo) === TipoTransacao.Receita && !podeCadastrarReceita)
                 }
               >
                 {criarMutation.isPending ? (
@@ -411,6 +456,61 @@ export default function Transacoes() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de sucesso */}
+      <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Transação criada ✅</DialogTitle>
+            <DialogDescription>Sua transação foi registrada com sucesso.</DialogDescription>
+          </DialogHeader>
+
+          {successInfo && (
+            <div className="mt-2 rounded-md border bg-muted/30 p-4 text-sm space-y-2">
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Descrição</span>
+                <span className="font-medium text-right">{successInfo.descricao}</span>
+              </div>
+
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Tipo</span>
+                <span className="font-medium">{successInfo.tipo}</span>
+              </div>
+
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Valor</span>
+                <span className="font-medium">{formatCurrency(successInfo.valor)}</span>
+              </div>
+
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Pessoa</span>
+                <span className="font-medium text-right">{successInfo.pessoa}</span>
+              </div>
+
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Categoria</span>
+                <span className="font-medium text-right">{successInfo.categoria}</span>
+              </div>
+
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Data</span>
+                <span className="font-medium text-right">{successInfo.data}</span>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setIsSuccessDialogOpen(false)
+                setSuccessInfo(null)
+              }}
+            >
+              Ok
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

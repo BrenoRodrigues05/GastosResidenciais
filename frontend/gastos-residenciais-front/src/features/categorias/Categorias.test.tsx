@@ -132,38 +132,30 @@ describe('Categorias Page', () => {
   })
 
   it('deve excluir uma categoria após confirmação', async () => {
-    const user = userEvent.setup()
-    const client = createTestQueryClient()
+  const user = userEvent.setup()
+  const client = createTestQueryClient()
 
-    ;(categoriasService.listar as any).mockResolvedValue([
-      { id: 1, descricao: 'Aluguel', finalidade: 'Despesa' },
-    ])
+  ;(categoriasService.listar as any).mockResolvedValue([
+    { id: 1, descricao: 'Aluguel', finalidade: 'Despesa' },
+  ])
 
-    ;(categoriasService.excluir as any).mockResolvedValue({})
+  ;(categoriasService.excluir as any).mockResolvedValue({})
 
-    const invalidateSpy = vi.spyOn(client, 'invalidateQueries')
+  const invalidateSpy = vi.spyOn(client, 'invalidateQueries')
 
-    const confirmSpy = vi
-      .spyOn(window, 'confirm')
-      .mockReturnValue(true)
+  renderWithClient(<Categorias />, client)
 
-    renderWithClient(<Categorias />, client)
+  await screen.findByText('Aluguel')
 
-    await screen.findByText('Aluguel')
+  const row = screen.getByText('Aluguel').closest('tr')!
+  const actions = within(row).getAllByRole('button')
 
-    const row = screen.getByText('Aluguel').closest('tr')!
-    const actions = within(row).getAllByRole('button')
+  await user.click(actions[1])
 
-    // botão excluir
-    await user.click(actions[1])
+  const dialog = screen.getByRole('dialog')
+  await user.click(within(dialog).getByRole('button', { name: /^excluir$/i }))
 
-    expect(confirmSpy).toHaveBeenCalled()
-    expect(categoriasService.excluir).toHaveBeenCalledWith(1)
-
-    expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: ['categorias'],
-    })
-
-    confirmSpy.mockRestore()
-  })
+  expect(categoriasService.excluir).toHaveBeenCalledWith(1)
+  expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['categorias'] })
+})
 })

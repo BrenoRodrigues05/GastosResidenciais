@@ -54,7 +54,6 @@ export default function Relatorios() {
     queryFn: relatoriosService.obterTotaisPorPessoa,
   })
 
-  // Dialog: controlar pessoa selecionada
   const [pessoaSelecionada, setPessoaSelecionada] = useState<{
     pessoaId: number
     pessoaNome: string
@@ -62,7 +61,6 @@ export default function Relatorios() {
 
   const isDialogOpen = !!pessoaSelecionada
 
-  // Busca transações só quando abrir o dialog (economiza request)
   const { data: transacoes, isLoading: isLoadingTransacoes } = useQuery({
     queryKey: ['transacoes'],
     queryFn: transacoesService.listar,
@@ -75,7 +73,7 @@ export default function Relatorios() {
     return transacoes.filter((t) => t.pessoaId === pessoaSelecionada.pessoaId)
   }, [pessoaSelecionada, transacoes])
 
-  // Totais da pessoa (calculados em cima das transações)
+  // Totais da pessoa 
   const totaisPessoa = useMemo(() => {
     const totalReceitas = transacoesDaPessoa
       .filter((t) => t.tipo === TipoTransacao.Receita)
@@ -182,7 +180,6 @@ export default function Relatorios() {
                     <TableBody>
                       {relatorio.pessoas.map((pessoa) => (
                         <TableRow key={pessoa.pessoaId}>
-                          {/* Nome + Botão */}
                           <TableCell className="font-medium">
                             <div className="flex items-center justify-between gap-3">
                               <span className="truncate">{pessoa.pessoaNome}</span>

@@ -32,9 +32,14 @@ import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
 
 export default function Pessoas() {
   const queryClient = useQueryClient()
+
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [pessoaEditando, setPessoaEditando] = useState<PessoaListDto | null>(null)
   const [formData, setFormData] = useState({ nome: '', idade: '' })
+
+  // Modal de confirmação de exclusão
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [pessoaParaExcluir, setPessoaParaExcluir] = useState<PessoaListDto | null>(null)
 
   const { data: pessoas, isLoading } = useQuery({
     queryKey: ['pessoas'],
@@ -65,6 +70,8 @@ export default function Pessoas() {
     mutationFn: (id: number) => pessoasService.excluir(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pessoas'] })
+      setIsDeleteDialogOpen(false)
+      setPessoaParaExcluir(null)
     },
   })
 
@@ -85,6 +92,7 @@ export default function Pessoas() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
     const dados = {
       nome: formData.nome,
       idade: parseInt(formData.idade),
@@ -97,10 +105,16 @@ export default function Pessoas() {
     }
   }
 
-  const handleExcluir = (id: number) => {
-    if (confirm('Tem certeza que deseja excluir esta pessoa?')) {
-      excluirMutation.mutate(id)
-    }
+  // Abre o modal 
+  const handleOpenDeleteDialog = (pessoa: PessoaListDto) => {
+    setPessoaParaExcluir(pessoa)
+    setIsDeleteDialogOpen(true)
+  }
+
+  // Confirma exclusão
+  const handleConfirmDelete = () => {
+    if (!pessoaParaExcluir) return
+    excluirMutation.mutate(pessoaParaExcluir.id)
   }
 
   return (
@@ -121,6 +135,7 @@ export default function Pessoas() {
           <CardTitle>Lista de Pessoas</CardTitle>
           <CardDescription>Todas as pessoas cadastradas no sistema</CardDescription>
         </CardHeader>
+
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
@@ -136,34 +151,42 @@ export default function Pessoas() {
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
+
                 <TableBody>
                   {pessoas.map((pessoa) => (
                     <TableRow key={pessoa.id} className="h-14">
-                      <TableCell className="font-semibold text-lg md:text-xl tracking-tight">{pessoa.nome}</TableCell>
-                       <TableCell>
-                            <span
-                              className={`px-2 py-1 rounded-md text-sm font-medium ${
-                                pessoa.idade < 18
-                                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                                  : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                              }`}
-                            >
-                              {pessoa.idade} anos
-                            </span>
-                          </TableCell>
+                      <TableCell className="font-semibold text-lg md:text-xl tracking-tight">
+                        {pessoa.nome}
+                      </TableCell>
+
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded-md text-sm font-medium ${
+                            pessoa.idade < 18
+                              ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                              : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                          }`}
+                        >
+                          {pessoa.idade} anos
+                        </span>
+                      </TableCell>
+
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => handleOpenDialog(pessoa)}
+                            aria-label="Editar"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
+
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleExcluir(pessoa.id)}
+                            onClick={() => handleOpenDeleteDialog(pessoa)}
+                            aria-label="Excluir"
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -176,37 +199,34 @@ export default function Pessoas() {
             </div>
           ) : (
             <p className="py-8 text-center text-muted-foreground">
-              Nenhuma pessoa cadastrada. Clique em "Nova Pessoa" para começar.
+              Nenhuma pessoa cadastrada. Clique em &quot;Nova Pessoa&quot; para começar.
             </p>
           )}
         </CardContent>
       </Card>
 
+      {/* Dialog criar/editar */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>
-                {pessoaEditando ? 'Editar Pessoa' : 'Nova Pessoa'}
-              </DialogTitle>
+              <DialogTitle>{pessoaEditando ? 'Editar Pessoa' : 'Nova Pessoa'}</DialogTitle>
               <DialogDescription>
-                {pessoaEditando
-                  ? 'Atualize os dados da pessoa'
-                  : 'Preencha os dados para criar uma nova pessoa'}
+                {pessoaEditando ? 'Atualize os dados da pessoa' : 'Preencha os dados para criar uma nova pessoa'}
               </DialogDescription>
             </DialogHeader>
+
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="nome">Nome</Label>
                 <Input
                   id="nome"
                   value={formData.nome}
-                  onChange={(e) =>
-                    setFormData({ ...formData, nome: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                   required
                 />
               </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="idade">Idade</Label>
                 <Input
@@ -214,13 +234,12 @@ export default function Pessoas() {
                   type="number"
                   min="0"
                   value={formData.idade}
-                  onChange={(e) =>
-                    setFormData({ ...formData, idade: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, idade: e.target.value })}
                   required
                 />
               </div>
             </div>
+
             <DialogFooter>
               <Button
                 type="button"
@@ -232,10 +251,8 @@ export default function Pessoas() {
               >
                 Cancelar
               </Button>
-              <Button
-                type="submit"
-                disabled={criarMutation.isPending || atualizarMutation.isPending}
-              >
+
+              <Button type="submit" disabled={criarMutation.isPending || atualizarMutation.isPending}>
                 {criarMutation.isPending || atualizarMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -249,6 +266,60 @@ export default function Pessoas() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog confirmar exclusão */}
+      <Dialog
+        open={isDeleteDialogOpen}
+        onOpenChange={(open) => {
+          if (excluirMutation.isPending) return
+          setIsDeleteDialogOpen(open)
+          if (!open) setPessoaParaExcluir(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir pessoa</DialogTitle>
+            <DialogDescription>
+              {pessoaParaExcluir ? (
+                <>
+                  Tem certeza que deseja excluir <span className="font-semibold">{pessoaParaExcluir.nome}</span>?
+                  <br />
+                  Essa ação não pode ser desfeita.
+                </>
+              ) : (
+                'Tem certeza que deseja excluir esta pessoa?'
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={excluirMutation.isPending}
+            >
+              Cancelar
+            </Button>
+
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={excluirMutation.isPending || !pessoaParaExcluir}
+            >
+              {excluirMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                'Excluir'
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
